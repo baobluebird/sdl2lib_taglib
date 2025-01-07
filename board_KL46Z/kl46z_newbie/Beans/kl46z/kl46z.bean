@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bean>
+  <Header>
+    <Name>kl46z</Name>
+    <UUID />
+    <Description />
+    <Author />
+    <Version>01.000</Version>
+    <Icon>DEFAULT</Icon>
+    <TypesFiles>PE</TypesFiles>
+    <FileVersion>6</FileVersion>
+  </Header>
+  <Options>
+    <SaveInspectorTabsViewUIStyle>true</SaveInspectorTabsViewUIStyle>
+    <Shortcut>kl46z</Shortcut>
+    <DemoDriver>no</DemoDriver>
+    <Category />
+    <BeanLevel>Low</BeanLevel>
+    <Copyright />
+  </Options>
+  <PropertyList>
+    <Property>
+      <TCompNameItem>
+        <Name>Component Name</Name>
+        <Symbol>DeviceName</Symbol>
+        <Hint>Name of the component.</Hint>
+        <ItemLevel>BASIC</ItemLevel>
+        <EditLine>true</EditLine>
+        <UI_DisplayIn>TABLE_AND_GRAPHICAL_VIEW</UI_DisplayIn>
+        <UI_DisplayExtraText>DISPLAY_AUTO_POSITION</UI_DisplayExtraText>
+        <UI_StringStyle>EDITBOX</UI_StringStyle>
+        <DefaultValue />
+      </TCompNameItem>
+    </Property>
+  </PropertyList>
+  <Links>
+    <EmptySection_DummyValue />
+  </Links>
+</Bean>
+
