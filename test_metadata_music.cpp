@@ -53,6 +53,22 @@ void addMetadataKey(TagLib::MPEG::File &file, const std::string &key, const std:
     }
 }
 
+void removeMetadataKey(TagLib::MPEG::File &file, const std::string &key) {
+    // Lấy tag ID3v2
+    TagLib::ID3v2::Tag *tag = file.ID3v2Tag();
+    if (tag) {
+        TagLib::ByteVector keyByteVector(key.c_str()); // Chuyển std::string sang TagLib::ByteVector
+        auto frameList = tag->frameListMap()[keyByteVector];
+        if (!frameList.isEmpty()) {
+            auto *frame = frameList.front();
+            tag->removeFrame(frame);
+            std::cout << "Removed key: " << key << std::endl;
+        } else {
+            std::cout << "Key not found: " << key << std::endl;
+        }
+    }
+}
+
 int main() {
     std::string filePath = "music/confession.mp3"; // Đường dẫn đến file MP3
 
@@ -67,7 +83,7 @@ int main() {
     viewMetadata(file);
 
     // Chỉnh sửa metadata
-    editMetadata(file, "TALB", "Updated Album"); // "TALB" là Frame ID cho Album
+    editMetadata(file, "TPUB", "Updated Album"); // "TALB" là Frame ID cho Album
 
     // Lưu thay đổi
     if (file.save()) {
@@ -77,7 +93,7 @@ int main() {
     }
 
     // Thêm một key mới vào metadata
-    addMetadataKey(file, "TPUB", "New Publisher"); // "TPUB" là Frame ID cho Publisher
+    //addMetadataKey(file, "TPUB", "New Publisher"); // "TPUB" là Frame ID cho Publisher
 
     // Lưu thay đổi
     if (file.save()) {
@@ -87,6 +103,19 @@ int main() {
     }
 
     // Hiển thị lại metadata
+    viewMetadata(file);
+
+    // Xóa một key khỏi metadata
+    removeMetadataKey(file, "TPUB");
+
+    // Lưu thay đổi
+    if (file.save()) {
+        std::cout << "Key removed and changes saved successfully!" << std::endl;
+    } else {
+        std::cerr << "Failed to save changes after removing key." << std::endl;
+    }
+
+    // Hiển thị metadata sau khi xóa key
     viewMetadata(file);
 
     return 0;
