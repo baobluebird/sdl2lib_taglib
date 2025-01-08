@@ -58,7 +58,7 @@ void read_uart(int uart_fd) {
 }
 
 int main() {
-    const char* port_name = "/dev/ttyACM1"; // Thay đổi nếu cần
+    const char* port_name = "/dev/ttyACM1"; 
     int baud_rate = B1152000;
 
     int uart_fd = configure_uart(port_name, baud_rate);

@@ -1,0 +1,6 @@
+g++ -o test_metadata test_metadata.cpp -ltag
+
+Setup video read metadata:
+
+sudo apt update
+sudo apt install ffmpeg libavformat-dev libavcodec-dev libavutil-dev
