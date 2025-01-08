@@ -13,5 +13,4 @@ sudo apt install ffmpeg libavformat-dev libavcodec-dev libavutil-dev
 
 compile video:
 
-g++ -o test_metadata_video test_metadata_video.cpp -lavformat -lavcodec -lavutil
-g++ -o edit_video_metadata edit_video_metadata.cpp -lavformat -lavcodec -lavutil
+g++ -o test_metadata_video test_metadata_video.cpp -ltag
