@@ -4,7 +4,7 @@ sudo apt install libtag1-dev
 
 
 compile audio:
-g++ -o test_metadata test_metadata.cpp -ltag
+g++ -o test_metadata_music test_metadata_music.cpp -ltag
 
 Setup video read metadata:
 
@@ -12,7 +12,5 @@ sudo apt update
 sudo apt install ffmpeg libavformat-dev libavcodec-dev libavutil-dev
 
 compile video:
-
-g++ -o test_metadata_video test_metadata_video.cpp -lmediainfo
 
 g++ -o test_metadata_video test_metadata_video.cpp -lavformat -lavcodec -lavutil
