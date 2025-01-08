@@ -21,7 +21,7 @@ int main() {
 
     // 2. Chỉnh sửa metadata
     std::cout << "\n=== Editing Metadata ===" << std::endl;
-    editMetadata(filePath, "title", "New Video Title");
+    editMetadata(filePath, "itle", "NEWTITLE");
 
     // 3. Thêm key mới
     std::cout << "\n=== Adding Custom Metadata ===" << std::endl;
