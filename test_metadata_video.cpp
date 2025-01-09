@@ -1,122 +1,34 @@
 #include <iostream>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
-#include <taglib/mpegfile.h>
-#include <taglib/id3v2tag.h>
-#include <taglib/textidentificationframe.h>
-#include <taglib/tbytevector.h>
-
-void viewMetadata(TagLib::MPEG::File &file) {
-    // Lấy tag ID3v2
-    TagLib::ID3v2::Tag *tag = file.ID3v2Tag();
-    if (tag) {
-        std::cout << "\n=== Current Metadata ===" << std::endl;
-        for (auto it = tag->frameList().begin(); it != tag->frameList().end(); ++it) {
-            auto *frame = dynamic_cast<TagLib::ID3v2::TextIdentificationFrame *>(*it);
-            if (frame) {
-                std::cout << frame->frameID().data() << ": " << frame->toString().to8Bit() << std::endl;
-            }
-        }
-    } else {
-        std::cout << "No ID3v2 tags found in the file." << std::endl;
-    }
-}
-
-void editMetadata(TagLib::MPEG::File &file, const std::string &key, const std::string &newValue) {
-    // Lấy tag ID3v2
-    TagLib::ID3v2::Tag *tag = file.ID3v2Tag(true); // `true` để tạo tag nếu chưa tồn tại
-    if (tag) {
-        TagLib::ByteVector keyByteVector(key.c_str()); // Chuyển std::string sang TagLib::ByteVector
-        auto frameList = tag->frameListMap()[keyByteVector];
-        if (!frameList.isEmpty()) {
-            auto *frame = dynamic_cast<TagLib::ID3v2::TextIdentificationFrame *>(frameList.front());
-            if (frame) {
-                frame->setText(TagLib::String(newValue, TagLib::String::UTF8));
-                std::cout << "Updated key: " << key << " with new value: " << newValue << std::endl;
-            }
-        } else {
-            std::cout << "Key not found: " << key << std::endl;
-        }
-    }
-}
-
-void addMetadataKey(TagLib::MPEG::File &file, const std::string &key, const std::string &value) {
-    // Lấy tag ID3v2
-    TagLib::ID3v2::Tag *tag = file.ID3v2Tag(true); // `true` để tạo tag nếu chưa tồn tại
-    if (tag) {
-        TagLib::ByteVector keyByteVector(key.c_str()); // Chuyển std::string sang TagLib::ByteVector
-        TagLib::ID3v2::TextIdentificationFrame *frame =
-            new TagLib::ID3v2::TextIdentificationFrame(keyByteVector, TagLib::String::UTF8);
-        frame->setText(TagLib::String(value, TagLib::String::UTF8));
-        tag->addFrame(frame);
-        std::cout << "Added new key: " << key << " with value: " << value << std::endl;
-    }
-}
-
-void removeMetadataKey(TagLib::MPEG::File &file, const std::string &key) {
-    // Lấy tag ID3v2
-    TagLib::ID3v2::Tag *tag = file.ID3v2Tag();
-    if (tag) {
-        TagLib::ByteVector keyByteVector(key.c_str()); // Chuyển std::string sang TagLib::ByteVector
-        auto frameList = tag->frameListMap()[keyByteVector];
-        if (!frameList.isEmpty()) {
-            auto *frame = frameList.front();
-            tag->removeFrame(frame);
-            std::cout << "Removed key: " << key << std::endl;
-        } else {
-            std::cout << "Key not found: " << key << std::endl;
-        }
-    }
-}
+#include <taglib/audioproperties.h>
 
 int main() {
-    std::string filePath = "music/confession.mp3"; // Đường dẫn đến file MP3
+    std::string filePath = "video/take.mp4"; // Path to the MP4 file
 
-    // Mở file MP3
-    TagLib::MPEG::File file(filePath.c_str());
-    if (!file.isOpen()) {
+    // Open the file using TagLib::FileRef
+    TagLib::FileRef file(filePath.c_str());
+
+    if (file.isNull()) {
         std::cerr << "Could not open file: " << filePath << std::endl;
         return 1;
     }
 
-    // Hiển thị metadata hiện tại
-    viewMetadata(file);
+    // Retrieve audio properties
+    TagLib::AudioProperties *audioProps = file.audioProperties();
+    if (audioProps) {
+        int duration = audioProps->length(); // Duration in seconds
+        int minutes = duration / 60;
+        int seconds = duration % 60;
 
-    // Chỉnh sửa metadata
-    editMetadata(file, "TALB", "Updated Album"); // "TALB" là Frame ID cho Album
-
-    // Lưu thay đổi
-    if (file.save()) {
-        std::cout << "Metadata updated successfully!" << std::endl;
+        std::cout << "Duration   : " << minutes << "m " << seconds << "s" << std::endl;
+        std::cout << "Bitrate    : " << audioProps->bitrate() << " kbps" << std::endl;
+        std::cout << "SampleRate : " << audioProps->sampleRate() << " Hz" << std::endl;
+        std::cout << "Channels   : " << audioProps->channels() << std::endl;
+        std::cout << "Size       : " << audioProps->length() << std::endl;
     } else {
-        std::cerr << "Failed to save metadata." << std::endl;
+        std::cout << "Audio properties not available for this file." << std::endl;
     }
-
-    // Thêm một key mới vào metadata
-    addMetadataKey(file, "TPUB", "New Publisher"); // "TPUB" là Frame ID cho Publisher
-
-    // Lưu thay đổi
-    if (file.save()) {
-        std::cout << "New key added and changes saved successfully!" << std::endl;
-    } else {
-        std::cerr << "Failed to save new key." << std::endl;
-    }
-
-    // Hiển thị lại metadata
-    viewMetadata(file);
-
-    // Xóa một key khỏi metadata
-    removeMetadataKey(file, "TPUB");
-
-    // Lưu thay đổi
-    if (file.save()) {
-        std::cout << "Key removed and changes saved successfully!" << std::endl;
-    } else {
-        std::cerr << "Failed to save changes after removing key." << std::endl;
-    }
-
-    // Hiển thị metadata sau khi xóa key
-    viewMetadata(file);
 
     return 0;
 }
