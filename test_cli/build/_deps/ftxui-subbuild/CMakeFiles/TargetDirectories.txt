@@ -1,0 +1,3 @@
+/home/bluebird/play_music_video_APP/test_cli/build/_deps/ftxui-subbuild/CMakeFiles/ftxui-populate.dir
+/home/bluebird/play_music_video_APP/test_cli/build/_deps/ftxui-subbuild/CMakeFiles/edit_cache.dir
+/home/bluebird/play_music_video_APP/test_cli/build/_deps/ftxui-subbuild/CMakeFiles/rebuild_cache.dir

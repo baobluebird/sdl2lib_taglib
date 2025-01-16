@@ -1,180 +1,161 @@
 #include <iostream>
-#include <string>
 #include <vector>
-#include <memory>
-#include <cstdlib> // system()
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <cstdlib>
 
-// Abstract MediaFile class
-class MediaFile {
-protected:
-    std::string fileName;
-    std::string pathName;
+// Hàm kiểm tra phần mở rộng của tệp
+bool has_extension(const std::string& filename, const std::string& extension) {
+    if (filename.size() >= extension.size()) {
+        return (filename.compare(filename.size() - extension.size(), extension.size(), extension) == 0);
+    }
+    return false;
+}
 
-public:
-    virtual void inputMediaFile() = 0;
-    virtual void detailMediaFile() = 0;
-    virtual std::string getPathName() const { return pathName; }
-    virtual ~MediaFile() {}
-};
-
-// MediaFileAudio class
-class MediaFileAudio : public MediaFile {
-public:
-    void inputMediaFile() override {
-        pathName = "/home/bluebird/play_music_video_APP/music/confession.mp3";
-        fileName = "confession.mp3"; // Extracted manually
+// Hàm liệt kê tất cả các USB được gắn kết
+std::vector<std::string> list_usb_devices(const std::string& base_path) {
+    std::vector<std::string> usb_devices;
+    DIR* dir = opendir(base_path.c_str());
+    if (!dir) {
+        std::cerr << "Error opening base USB path: " << base_path << '\n';
+        return usb_devices;
     }
 
-    void detailMediaFile() override {
-        std::cout << "Audio File: " << fileName << ", Path: " << pathName << "\n";
-    }
-};
-
-// MediaFileVideo class
-class MediaFileVideo : public MediaFile {
-public:
-    void inputMediaFile() override {
-        pathName = "/home/bluebird/play_music_video_APP/video/take.mp4";
-        fileName = "take.mp4"; // Extracted manually
-    }
-
-    void detailMediaFile() override {
-        std::cout << "Video File: " << fileName << ", Path: " << pathName << "\n";
-    }
-};
-
-// MetadataManager class
-class MetadataManager {
-    std::vector<std::shared_ptr<MediaFile>> listMediaFile;
-
-public:
-    void addMediaFile(std::shared_ptr<MediaFile> file) {
-        listMediaFile.push_back(file);
-    }
-
-    void displayListMediaFile() {
-        for (auto &file : listMediaFile) {
-            file->detailMediaFile();
-        }
-    }
-};
-
-// Player class
-class Player {
-    int volume;
-
-public:
-    Player() : volume(50) {
-        if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-            std::cerr << "Failed to initialize SDL: " << SDL_GetError() << std::endl;
-        }
-        if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-            std::cerr << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << std::endl;
-        }
-    }
-
-    ~Player() {
-        Mix_CloseAudio();
-        SDL_Quit();
-    }
-
-    // Play audio file
-    void play(const std::string &filePath) {
-        Mix_Music *music = Mix_LoadMUS(filePath.c_str());
-        if (!music) {
-            std::cerr << "Failed to load music: " << Mix_GetError() << std::endl;
-            return;
-        }
-
-        Mix_PlayMusic(music, 1);  // Play once
-        std::cout << "Playing file: " << filePath << "\n";
-        SDL_Delay(5000);  // Delay để phát file trong 5 giây
-
-        Mix_FreeMusic(music);
-    }
-
-    // Extract audio from video
-    std::string extractAudio(const std::string &videoPath) {
-        std::string outputAudioPath = "extracted_audio.wav";
-
-        // Sử dụng FFmpeg để trích xuất âm thanh
-        std::string command = "ffmpeg -i " + videoPath + " -q:a 0 -map a " + outputAudioPath + " -y";
-        int result = system(command.c_str());
-
-        if (result != 0) {
-            std::cerr << "Failed to extract audio using FFmpeg.\n";
-            return "";
-        }
-
-        std::cout << "Audio extracted to: " << outputAudioPath << "\n";
-        return outputAudioPath;
-    }
-
-    void adjustVolume(int newVolume) {
-        volume = newVolume;
-        Mix_VolumeMusic(volume);
-        std::cout << "Volume set to: " << volume << "\n";
-    }
-};
-
-// App class
-class App {
-    MetadataManager metadataManager;
-    Player player;
-
-public:
-    void viewAllMediaFiles() {
-        metadataManager.displayListMediaFile();
-    }
-
-    void playMedia(std::shared_ptr<MediaFile> mediaFile) {
-        std::string filePath = mediaFile->getPathName();
-
-        if (filePath.find(".mp4") != std::string::npos) { // Nếu là file video
-            std::string audioPath = player.extractAudio(filePath);
-            if (!audioPath.empty()) {
-                player.play(audioPath);
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        if (std::string(entry->d_name) != "." && std::string(entry->d_name) != "..") {
+            std::string full_path = base_path + "/" + entry->d_name;
+            struct stat sb;
+            if (stat(full_path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) {
+                usb_devices.push_back(full_path);
             }
-        } else { // Nếu là file audio
-            player.play(filePath);
         }
     }
+    closedir(dir);
+    return usb_devices;
+}
 
-    void addMediaFileToManager(std::shared_ptr<MediaFile> mediaFile) {
-        metadataManager.addMediaFile(mediaFile);
+// Hàm liệt kê tất cả các thư mục trong một đường dẫn
+std::vector<std::string> list_folders(const std::string& path) {
+    std::vector<std::string> folders;
+    DIR* dir = opendir(path.c_str());
+    if (!dir) {
+        std::cerr << "Error opening directory: " << path << '\n';
+        return folders;
     }
 
-    void adjustVolume(int volume) {
-        player.adjustVolume(volume);
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        if (std::string(entry->d_name) != "." && std::string(entry->d_name) != "..") {
+            std::string full_path = path + "/" + entry->d_name;
+            struct stat sb;
+            if (stat(full_path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) {
+                folders.push_back(full_path);
+            }
+        }
     }
-};
+    closedir(dir);
+    return folders;
+}
 
-// Main function
+// Hàm liệt kê các file mp3 và mp4 trong một đường dẫn
+void list_media_files(const std::string& path) {
+    DIR* dir = opendir(path.c_str());
+    if (!dir) {
+        std::cerr << "Error opening directory: " << path << '\n';
+        return;
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        if (std::string(entry->d_name) != "." && std::string(entry->d_name) != "..") {
+            std::string full_path = path + "/" + entry->d_name;
+            struct stat sb;
+            if (stat(full_path.c_str(), &sb) == 0 && S_ISREG(sb.st_mode)) {
+                std::string filename = entry->d_name;
+                if (has_extension(filename, ".mp3") || has_extension(filename, ".mp4")) {
+                    std::cout << filename << '\n';
+                }
+            }
+        }
+    }
+    closedir(dir);
+}
+
+// Hàm quét tất cả các thư mục và liệt kê file mp3, mp4
+void scan_all_folders(const std::string& path) {
+    std::vector<std::string> folders = list_folders(path);
+    for (const auto& folder : folders) {
+        list_media_files(folder);
+    }
+}
+
 int main() {
-    App app;
+    std::string usb_base_path = "/media/" + std::string(std::getenv("USER"));
+    std::vector<std::string> usb_devices = list_usb_devices(usb_base_path);
 
-    // Create Audio and Video files
-    std::shared_ptr<MediaFileAudio> audioFile = std::make_shared<MediaFileAudio>();
-    audioFile->inputMediaFile();
+    if (usb_devices.empty()) {
+        std::cerr << "No USB devices found.\n";
+        return 1;
+    }
 
-    std::shared_ptr<MediaFileVideo> videoFile = std::make_shared<MediaFileVideo>();
-    videoFile->inputMediaFile();
+    // Hiển thị các USB được gắn
+    std::cout << "USB devices connected:\n";
+    for (size_t i = 0; i < usb_devices.size(); ++i) {
+        std::cout << i + 1 << ". " << usb_devices[i] << '\n';
+    }
 
-    // Add files to MetadataManager
-    app.addMediaFileToManager(audioFile);
-    app.addMediaFileToManager(videoFile);
+    // Chọn USB
+    int usb_choice = 0;
+    std::cout << "Enter the number of the USB you want to scan: ";
+    std::cin >> usb_choice;
 
-    // Display all media files
-    app.viewAllMediaFiles();
+    if (usb_choice < 1 || usb_choice > static_cast<int>(usb_devices.size())) {
+        std::cerr << "Invalid choice.\n";
+        return 1;
+    }
 
-    // Play a media file (audio or video)
-    app.playMedia(audioFile); // Chơi file audio
-    app.playMedia(videoFile); // Chơi file video (sẽ trích xuất âm thanh trước)
+    std::string selected_usb = usb_devices[usb_choice - 1];
 
-    // Adjust volume
-    app.adjustVolume(70);
+    // Lựa chọn hành động
+    int action_choice = 0;
+    std::cout << "Choose an action:\n";
+    std::cout << "1. Scan all folders for MP3 and MP4 files\n";
+    std::cout << "2. Choose a specific folder to scan\n";
+    std::cin >> action_choice;
+
+    if (action_choice == 1) {
+        // Quét tất cả các folder
+        scan_all_folders(selected_usb);
+    } else if (action_choice == 2) {
+        // Hiển thị tất cả các folder
+        std::vector<std::string> folders = list_folders(selected_usb);
+        if (folders.empty()) {
+            std::cerr << "No folders found in the selected USB.\n";
+            return 1;
+        }
+
+        std::cout << "Folders in USB:\n";
+        for (size_t i = 0; i < folders.size(); ++i) {
+            std::cout << i + 1 << ". " << folders[i] << '\n';
+        }
+
+        // Chọn folder
+        int folder_choice = 0;
+        std::cout << "Enter the number of the folder you want to scan: ";
+        std::cin >> folder_choice;
+
+        if (folder_choice < 1 || folder_choice > static_cast<int>(folders.size())) {
+            std::cerr << "Invalid choice.\n";
+            return 1;
+        }
+
+        std::string selected_folder = folders[folder_choice - 1];
+        list_media_files(selected_folder);
+    } else {
+        std::cerr << "Invalid action choice.\n";
+        return 1;
+    }
 
     return 0;
 }

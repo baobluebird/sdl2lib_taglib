@@ -1,0 +1,14 @@
+# Target labels
+ ftxui-populate
+# Source files and their labels
+/home/bluebird/play_music_video_APP/test_cli/build/_deps/ftxui-subbuild/CMakeFiles/ftxui-populate
+/home/bluebird/play_music_video_APP/test_cli/build/_deps/ftxui-subbuild/CMakeFiles/ftxui-populate.rule
+/home/bluebird/play_music_video_APP/test_cli/build/_deps/ftxui-subbuild/CMakeFiles/ftxui-populate-complete.rule
+/home/bluebird/play_music_video_APP/test_cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-build.rule
+/home/bluebird/play_music_video_APP/test_cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-configure.rule
+/home/bluebird/play_music_video_APP/test_cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-download.rule
+/home/bluebird/play_music_video_APP/test_cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-install.rule
+/home/bluebird/play_music_video_APP/test_cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-mkdir.rule
+/home/bluebird/play_music_video_APP/test_cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-patch.rule
+/home/bluebird/play_music_video_APP/test_cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-test.rule
+/home/bluebird/play_music_video_APP/test_cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-update.rule
